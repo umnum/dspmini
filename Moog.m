@@ -35,8 +35,9 @@ classdef Moog < audioPlugin
 	fc = 5000;
 	r = 0.5;
 	g
-	Vt = 0.000025;
-	yprev = [0 0;0 0;0 0;0 0];
+	Vt = 2000000; % i chose a rediculously large number here to match
+	              % values that are similar to the algorithm i found online
+	yprev = [0 0;0 0;0 0;0 0;0 0;0 0];
 	Wprev = [0 0;0 0;0 0];
     end
     
@@ -51,6 +52,7 @@ classdef Moog < audioPlugin
     end
     
     properties (Constant)
+        tTable = tanh(linspace(-1e-10,1e-10,2000000));
         % audioPluginInterface manages the number of input/output channels
         % and uses audioPluginParameter to generate plugin UI parameters.
         PluginInterface = audioPluginInterface(...
@@ -61,7 +63,7 @@ classdef Moog < audioPlugin
             'VendorVersion', '3.1.4', ...
             'UniqueId', '4pvz',...
             audioPluginParameter('fc',...
-            'DisplayName','Cutoff Frequency','Label','Fc','Mapping',{'lin',1000 10000}),...
+            'DisplayName','Cutoff Frequency','Label','Fc','Mapping',{'lin',0 10000}),...
             audioPluginParameter('r',...
             'DisplayName','Resonance','Label','Res','Mapping',{'lin',0 1}));
     end
@@ -103,6 +105,10 @@ classdef Moog < audioPlugin
             obj.r = r;
         end
 
+	function y = tanhTable(x)
+	    y = tTable(round(100*(x+1)+1));
+	end
+
 	function [obj, out] = moogfilter(obj, x)
 	    A = max(x);
 	    out = [];
@@ -116,33 +122,55 @@ classdef Moog < audioPlugin
 	    Vtx2xg = Vtx2*obj.g;
 	    for n = 1:length(x)
 
-		    for m = 1:2
-		    	y(1,:) = yprev(1,:) + Vtx2xg*(tanh((x(n,:)-4*r*yprev(6,:))./(2*Vt))-Wprev(1,:));
+		    % number of times the moog ladder is processed, choosing 1 for now
+		    % (choosing 2 made it really glitchy)
+		    for m = 1:1
+			z = (x(n,:)-4*r*yprev(6,:))./(2*Vt);
+			%z = round(z*1e13)+1e6;
+			%z = round(z*1.0e10+561185117);
+			%disp(round(z*1.0e10+561185117));
+		    	y(1,:) = yprev(1,:) + Vtx2xg*(tanh(z)-Wprev(1,:));
 
-		    	W(1,:) = tanh(y(1,:)/(Vtx2));
+			z = y(1,:)/(Vtx2);
+			%z = round(z*1e13)+1e6;
+			%z = round(z*1.0e10+561185117)
+			%disp(round(z*1.0e10+561185117));
+		    	W(1,:) = tanh(z);
 
 		    	y(2,:) = yprev(2,:) + Vtx2xg*(W(1,:)-Wprev(2,:));
 
-		    	W(2,:) = tanh(y(2,:)/Vtx2);
+			z = y(2,:)/Vtx2;
+			%z = round(z*1e13)+1e6;
+			%z = round(z*1.0e10+561185117);
+			%disp(round(z*1.0e10+561185117));
+		    	W(2,:) = tanh(z);
 
 		    	y(3,:) = yprev(3,:) + Vtx2xg*(W(2,:)-Wprev(3,:));
 
-		    	W(3,:) = tanh(y(3,:)/(Vtx2));
+			z = y(3,:)/(Vtx2);
+			%z = round(z*1e13)+1e6;
+			%z = round(z*1.0e10+561185117);
+			%disp(round(z*1.0e10+561185117));
+		    	W(3,:) = tanh(z);
 
-		    	y(4,:) = yprev(4,:) + Vtx2xg*(W(3,:)-tanh(yprev(4,:)/(Vtx2)));
+			z = yprev(4,:)/(Vtx2);
+			%z = round(z*1e13)+1e6;
+			%z = round(z*1.0e10+561185117);
+			%disp(round(z*1.0e10+561185117));
+		    	y(4,:) = yprev(4,:) + Vtx2xg*(W(3,:)-tanh(z));
 
 			yprev(6,:) = (y(4,:) + yprev(5,:))*0.5;
 
 			yprev(5,:) = y(4,:);
 
-			%TODO
 		    	yprev(1:4,:) = y(1:4,:);
 
 		    	Wprev = W;
 		end
 		out = [out;yprev(6,:)];
 	    end
-	    %out = A(1)*out/max(out);
+	    maxout = max(out);
+	    out = A(1)*out/maxout(1);
 	    obj.yprev = yprev;
 	    obj.Wprev = Wprev;
 	end
