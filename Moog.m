@@ -90,7 +90,7 @@ classdef Moog < audioPlugin
 	% Moog filter implementation
 	function [obj, out] = moogfilter(obj, x)
 	    % storing class variables as local variables
-	    A = max(x)*obj.A;
+	    A = max(max(x))*obj.A;
 	    yprev = obj.yprev;
 	    y = zeros(size(yprev));
 	    Wprev = obj.Wprev;
@@ -142,9 +142,17 @@ classdef Moog < audioPlugin
 
 		    	Wprev = W;
 		end
+
+		% prevent clipping in both channels
+		if (yprev(6,1) > A)
+			yprev(6,1) = A;
+		end
+		if (yprev(6,2) > A)
+			yprev(6,2) = A;
+		end
 		out = [out;yprev(6,:)];
 	    end
-	    out = A(1)*out/max(max(out));
+	    out = A*out/max(max(out));
 	    obj.yprev = yprev;
 	    obj.Wprev = Wprev;
 	end
