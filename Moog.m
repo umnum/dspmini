@@ -26,8 +26,6 @@ classdef Moog < audioPlugin
     
     properties (Constant)
 
-        %tTable = tanh(linspace(-1e-10,1e-10,2000000));
-
         % audioPluginInterface manages the number of input/output channels
         % and uses audioPluginParameter to generate plugin UI parameters.
         PluginInterface = audioPluginInterface(...
@@ -46,7 +44,7 @@ classdef Moog < audioPlugin
     end
     
     properties (Access = private)
-        % Sample rate
+        % sample rate
 	fs
     end
     
@@ -73,26 +71,26 @@ classdef Moog < audioPlugin
 	    obj.g = 1-exp(-2*pi*fc/fs);
         end
         
+	% set the output amplitude gain
         function set.A(obj, A)
             obj.A = A;
         end
 
+	% set the cutoff frequency and g
         function set.fc(obj, fc)
             obj.fc = fc;
 	    obj.g = 1-exp(-2*pi*fc/obj.fs);
         end
         
+	% set the resonance
         function set.r(obj,r)
             obj.r = r;
         end
 
-	%function y = tanhTable(x)
-	%    y = tTable(round(100*(x+1)+1));
-	%end
-
+	% Moog filter implementation
 	function [obj, out] = moogfilter(obj, x)
+	    % storing class variables as local variables
 	    A = max(x)*obj.A;
-	    out = [];
 	    yprev = obj.yprev;
 	    y = zeros(size(yprev));
 	    Wprev = obj.Wprev;
@@ -101,44 +99,40 @@ classdef Moog < audioPlugin
 	    Vt = obj.Vt;
 	    Vtx2 = Vt*2;
 	    Vtx2xg = Vtx2*obj.g;
+	    % initialize output buffer
+	    out = [];
+
+	    % process the input buffer
 	    for n = 1:length(x)
 
-		    % number of times the moog ladder is processed, choosing 1 for now
+		    % m is the number of times the moog ladder is processed, choosing 1 for now
 		    % (choosing m = 1:2 made it really glitchy)
 		    for m = 1:1
 			z = (x(n,:)-4*r*yprev(6,:))./(2*Vt);
-			%z = round(z*1e13)+1e6;
-			%z = round(z*1.0e10+561185117);
-			%disp(round(z*1.0e10+561185117));
 		    	y(1,:) = yprev(1,:) + Vtx2xg*(tanh(z)-Wprev(1,:));
 
 			z = y(1,:)/(Vtx2);
-			%z = round(z*1e13)+1e6;
-			%z = round(z*1.0e10+561185117)
-			%disp(round(z*1.0e10+561185117));
-		    	W(1,:) = tanh(z);
+
+		    	%W(1,:) = tanh(z);
+		    	W(1,:) = (z);
 
 		    	y(2,:) = yprev(2,:) + Vtx2xg*(W(1,:)-Wprev(2,:));
 
 			z = y(2,:)/Vtx2;
-			%z = round(z*1e13)+1e6;
-			%z = round(z*1.0e10+561185117);
-			%disp(round(z*1.0e10+561185117));
-		    	W(2,:) = tanh(z);
+
+		    	%W(2,:) = tanh(z);
+		    	W(2,:) = (z);
 
 		    	y(3,:) = yprev(3,:) + Vtx2xg*(W(2,:)-Wprev(3,:));
 
 			z = y(3,:)/(Vtx2);
-			%z = round(z*1e13)+1e6;
-			%z = round(z*1.0e10+561185117);
-			%disp(round(z*1.0e10+561185117));
-		    	W(3,:) = tanh(z);
+
+		    	%W(3,:) = tanh(z);
+		    	W(3,:) = (z);
 
 			z = yprev(4,:)/(Vtx2);
-			%z = round(z*1e13)+1e6;
-			%z = round(z*1.0e10+561185117);
-			%disp(round(z*1.0e10+561185117));
-		    	y(4,:) = yprev(4,:) + Vtx2xg*(W(3,:)-tanh(z));
+		    	%y(4,:) = yprev(4,:) + Vtx2xg*(W(3,:)-tanh(z));
+		    	y(4,:) = yprev(4,:) + Vtx2xg*(W(3,:)-(z));
 
 			yprev(6,:) = (y(4,:) + yprev(5,:))*0.5;
 
@@ -150,7 +144,6 @@ classdef Moog < audioPlugin
 		end
 		out = [out;yprev(6,:)];
 	    end
-	    %maxout = max(out);
 	    out = A(1)*out/max(max(out));
 	    obj.yprev = yprev;
 	    obj.Wprev = Wprev;
