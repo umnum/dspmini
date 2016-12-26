@@ -62,7 +62,7 @@ classdef Moog < audioPlugin
             obj.fs = fs;
 	    % reset cutoff frequency
 	    fc = 1000;
-	    obj.fc = fc;
+	    %obj.fc = fc; % comment this line out when exporting to VST
             % reset yprev
             obj.yprev = [0 0;0 0;0 0;0 0;0 0;0 0];
 	    % reset Wprev
