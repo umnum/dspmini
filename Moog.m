@@ -54,10 +54,9 @@ classdef Moog < audioPlugin
         function obj = Moog()
             obj.fs = getSampleRate(obj);
 	    obj.g = 1-exp(-2*pi*obj.fc/obj.fs);
-	    obj.hpFilt = designfilt('highpassfir','StopbandFrequency',10/(obj.fs/2), ...
-	             'PassbandFrequency',150/(obj.fs/2),'PassbandRipple',0.5, ...
-		              'StopbandAttenuation',65,'DesignMethod','kaiserwin');
-
+	    [n,Wn,beta,ftype] = kaiserord([10 150],[1 0],...
+	    [0.01 0.1],44100);
+	    obj.hpFilt = fir1(n,Wn,'high',kaiser(n+1,beta),'noscale');
         end
         
         % reset parameter values and internal buffers
@@ -173,7 +172,7 @@ classdef Moog < audioPlugin
 	    end
 
 	    % high pass filter
-	    y = filter(obj.hpFilt,y);
+	    y = filter(obj.hpFilt,1,y);
         end
     end
 end
