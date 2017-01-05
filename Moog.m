@@ -13,7 +13,6 @@ classdef Moog < audioPlugin
 	r = 0.5;
 	A = 0.5;
 	g
-	hpFilt
 	Vt = 2000000; % Thermal Voltage, value should technically be 25 mV
 	              % I chose a rediculously large number here to match
 	              % values that are similar to the algorithm i found online
@@ -54,9 +53,6 @@ classdef Moog < audioPlugin
         function obj = Moog()
             obj.fs = getSampleRate(obj);
 	    obj.g = 1-exp(-2*pi*obj.fc/obj.fs);
-	    obj.hpFilt = dsp.HighpassFilter('SampleRate',44100,'FilterType','FIR',...
-	    'DesignForMinimumOrder',false,...
-	    'PassbandFrequency',100,'PassbandRipple',0.01,'StopbandAttenuation',80);
         end
         
         % reset parameter values and internal buffers
@@ -94,7 +90,7 @@ classdef Moog < audioPlugin
 	% Moog filter implementation
 	function [obj, out] = moogfilter(obj, x)
 	    % storing class variables as local variables
-	    A = obj.A;
+	    A = max(max(x))*obj.A;
 	    yprev = obj.yprev;
 	    y = zeros(size(yprev));
 	    Wprev = obj.Wprev;
@@ -170,9 +166,6 @@ classdef Moog < audioPlugin
 	    if (max(max(y) > 1))
 		    y = y*obj.A/max(max(y));
 	    end
-
-	    % high pass filter
-	    y = obj.hpFilt(y);
         end
     end
 end
