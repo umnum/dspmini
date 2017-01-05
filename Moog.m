@@ -90,7 +90,7 @@ classdef Moog < audioPlugin
 	% Moog filter implementation
 	function [obj, out] = moogfilter(obj, x)
 	    % storing class variables as local variables
-	    A = max(max(x))*obj.A;
+	    A = obj.A;
 	    yprev = obj.yprev;
 	    y = zeros(size(yprev));
 	    Wprev = obj.Wprev;
@@ -107,7 +107,7 @@ classdef Moog < audioPlugin
 
 		    % m is the number of times the moog ladder is processed, choosing 1 for now
 		    % (choosing m = 1:2 made it really glitchy)
-		    for m = 1:1
+		    for m = 1:2
 			z = (x(n,:)-4*r*yprev(6,:))./(2*Vt);
 		    	y(1,:) = yprev(1,:) + Vtx2xg*(tanh(z)-Wprev(1,:));
 
@@ -152,7 +152,7 @@ classdef Moog < audioPlugin
 		end
 		out = [out;yprev(6,:)];
 	    end
-	    out = A*out/max(max(out));
+	    out = A.*out./(max(out));
 	    obj.yprev = yprev;
 	    obj.Wprev = Wprev;
 	end
@@ -164,7 +164,7 @@ classdef Moog < audioPlugin
 
 	    % prevent clipping
 	    if (max(max(y) > 1))
-		    y = y*obj.A/max(max(y));
+		    y = y*obj.A*0.5./(max(y));
 	    end
         end
     end
