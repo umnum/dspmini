@@ -113,26 +113,26 @@ classdef Moog < audioPlugin
 
 			z = y(1,:)/(Vtx2);
 
-		    	%W(1,:) = tanh(z);
-		    	W(1,:) = (z);
+		    	W(1,:) = tanh(z);
+		    	%W(1,:) = (z);
 
 		    	y(2,:) = yprev(2,:) + Vtx2xg*(W(1,:)-Wprev(2,:));
 
 			z = y(2,:)/Vtx2;
 
-		    	%W(2,:) = tanh(z);
-		    	W(2,:) = (z);
+		    	W(2,:) = tanh(z);
+		    	%W(2,:) = (z);
 
 		    	y(3,:) = yprev(3,:) + Vtx2xg*(W(2,:)-Wprev(3,:));
 
 			z = y(3,:)/(Vtx2);
 
-		    	%W(3,:) = tanh(z);
-		    	W(3,:) = (z);
+		    	W(3,:) = tanh(z);
+		    	%W(3,:) = (z);
 
 			z = yprev(4,:)/(Vtx2);
-		    	%y(4,:) = yprev(4,:) + Vtx2xg*(W(3,:)-tanh(z));
-		    	y(4,:) = yprev(4,:) + Vtx2xg*(W(3,:)-(z));
+		    	y(4,:) = yprev(4,:) + Vtx2xg*(W(3,:)-tanh(z));
+		    	%y(4,:) = yprev(4,:) + Vtx2xg*(W(3,:)-(z));
 
 			yprev(6,:) = (y(4,:) + yprev(5,:))*0.5;
 
@@ -161,6 +161,11 @@ classdef Moog < audioPlugin
         function y = process(obj, x)
             % calculate moog filter
             [~, y] = moogfilter(obj, x);
+
+	    % prevent clipping
+	    if (max(max(y) > 1))
+		    y = y*obj.A/max(max(y));
+	    end
         end
     end
 end
