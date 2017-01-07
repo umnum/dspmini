@@ -38,7 +38,7 @@ classdef Moog < audioPlugin
             audioPluginParameter('A',...
             'DisplayName','Amplitude','Label','Amp','Mapping',{'lin',0 1}),...
             audioPluginParameter('fc',...
-            'DisplayName','Cutoff Frequency','Label','Fc','Mapping',{'lin',0 10000}),...
+            'DisplayName','Cutoff Frequency','Label','Fc','Mapping',{'lin',100 10000}),...
             audioPluginParameter('r',...
             'DisplayName','Resonance','Label','Res','Mapping',{'lin',0 1}));
     end
@@ -89,6 +89,7 @@ classdef Moog < audioPlugin
 
 	% Moog filter implementation
 	function [obj, out] = moogfilter(obj, x)
+
 	    % storing class variables as local variables
 	    A = obj.A;
 	    yprev = obj.yprev;
@@ -99,56 +100,49 @@ classdef Moog < audioPlugin
 	    Vt = obj.Vt;
 	    Vtx2 = Vt*2;
 	    Vtx2xg = Vtx2*obj.g;
+
 	    % initialize output buffer
 	    out = [];
 
 	    % process the input buffer
 	    for n = 1:length(x)
 
-		    % m is the number of times the moog ladder is processed, choosing 1 for now
-		    % (choosing m = 1:2 made it really glitchy)
-		    for m = 1:2
-			z = (x(n,:)-4*r*yprev(6,:))./(2*Vt);
-		    	y(1,:) = yprev(1,:) + Vtx2xg*(tanh(z)-Wprev(1,:));
+	    	% m is the number of times the moog ladder is processed
+		for m = 1:2
 
-			z = y(1,:)/(Vtx2);
+		    % the first stage of the Moog ladder filter
+   	   	    theta = (x(n,:)-4*r*yprev(6,:))./(2*Vt);
+		    y(1,:) = yprev(1,:) + Vtx2xg*(tanh(theta)-Wprev(1,:));
 
-		    	W(1,:) = tanh(z);
-		    	%W(1,:) = (z);
+		    % the next two stages of the filter
+		    for k = 1:3
+			theta = y(k,:)/(Vtx2);
+			W(k,:) = tanh(theta);
+			    if (k~=3) % the final stage is calculated differently
+				y(k+1,:) = yprev(k+1,:) + Vtx2xg*(W(k,:)-Wprev(k+1,:));
+			    end
+  		    end
 
-		    	y(2,:) = yprev(2,:) + Vtx2xg*(W(1,:)-Wprev(2,:));
+		    % the final stage of the filter
+		    theta = yprev(4,:)/(Vtx2);
+		    y(4,:) = yprev(4,:) + Vtx2xg*(W(3,:)-tanh(theta));
 
-			z = y(2,:)/Vtx2;
+		    % adjust the output phase
+		    yprev(6,:) = (y(4,:) + yprev(5,:))*0.5;
 
-		    	W(2,:) = tanh(z);
-		    	%W(2,:) = (z);
+		    yprev(5,:) = y(4,:);
 
-		    	y(3,:) = yprev(3,:) + Vtx2xg*(W(2,:)-Wprev(3,:));
-
-			z = y(3,:)/(Vtx2);
-
-		    	W(3,:) = tanh(z);
-		    	%W(3,:) = (z);
-
-			z = yprev(4,:)/(Vtx2);
-		    	y(4,:) = yprev(4,:) + Vtx2xg*(W(3,:)-tanh(z));
-		    	%y(4,:) = yprev(4,:) + Vtx2xg*(W(3,:)-(z));
-
-			yprev(6,:) = (y(4,:) + yprev(5,:))*0.5;
-
-			yprev(5,:) = y(4,:);
-
-		    	yprev(1:4,:) = y(1:4,:);
-
-		    	Wprev = W;
+		    % update the unit delays
+		    yprev(1:4,:) = y(1:4,:);
+		    Wprev = W;
 		end
 
 		% prevent clipping in both channels
-		if (yprev(6,1) > A)
-			yprev(6,1) = A;
-		end
-		if (yprev(6,2) > A)
-			yprev(6,2) = A;
+		[yprevlength,numchannels] = size(yprev);
+		for n = 1:numchannels
+			if (yprev(6,n) > A)
+				yprev(6,n) = A;
+			end
 		end
 		out = [out;yprev(6,:)];
 	    end
@@ -161,11 +155,6 @@ classdef Moog < audioPlugin
         function y = process(obj, x)
             % calculate moog filter
             [~, y] = moogfilter(obj, x);
-
-	    % prevent clipping
-	    if (max(max(y) > 1))
-		    y = y*obj.A*0.5./(max(y));
-	    end
         end
     end
 end
