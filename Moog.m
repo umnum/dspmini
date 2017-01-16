@@ -14,8 +14,9 @@ classdef Moog < audioPlugin
 	A = 0.5;
 	g
 	Vt = 2000000; % Thermal Voltage, value should technically be 25 mV
-	              % I chose a rediculously large number here to match
-	              % values that are similar to the algorithm i found online
+	              % I chose a rediculously large number here because
+		      % it led to a more noticable change when sweeping
+		      % the control frequency
 	% unit delays
 	yprev = [0 0;0 0;0 0;0 0;0 0;0 0];
 	Wprev = [0 0;0 0;0 0];
@@ -38,7 +39,7 @@ classdef Moog < audioPlugin
             audioPluginParameter('A',...
             'DisplayName','Amplitude','Label','Amp','Mapping',{'lin',0 1}),...
             audioPluginParameter('fc',...
-            'DisplayName','Cutoff Frequency','Label','Fc','Mapping',{'lin',100 10000}),...
+            'DisplayName','Cutoff Frequency','Label','Fc','Mapping',{'lin',0 10000}),...
             audioPluginParameter('r',...
             'DisplayName','Resonance','Label','Res','Mapping',{'lin',0 1}));
     end
