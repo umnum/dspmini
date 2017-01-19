@@ -34,9 +34,9 @@ MoogAudioProcessor::MoogAudioProcessor()
                                                   1.0f));    // default value
     addParameter (fc = new AudioParameterFloat("fc", "Cutoff Frequency", 0.0f, 10000.0f, 10000.0f));
     addParameter (resonance = new AudioParameterFloat("resonance", "Resonance", 0.0f, 10.0f, 1.0f));
-    
+
     // set g
-    g = 1.0f-(float)exp(-M_PI_2*(*fc)/getSampleRate());
+    setG();
     for (int i = 0; i < 6; ++i)
     {
         for (int channel = 0; channel < 2; ++channel)
@@ -176,7 +176,6 @@ void MoogAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& mi
             // process the Moog ladder filter
             if (channelData[i+numSamples*channel] > maxin)
                 maxin = channelData[i+numSamples*channel];
-            setG();
             float Vtx2xg = Vt*2*g;
             for (int m = 0; m < 2; ++m)
             {

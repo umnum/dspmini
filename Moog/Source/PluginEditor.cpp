@@ -70,12 +70,10 @@ void MoogAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
-    
-    /*TODO: running this section of code crashes Ableton
     Rectangle<int> r = getLocalBounds();
     noParameterLabel.setBounds(r);
     
-    for (int i = 0; paramSliders.size(); ++i)
+    for (int i = 0; i < paramSliders.size(); ++i)
     {
 
         Rectangle<int> paramBounds = r.removeFromTop(kParamControlHeight);
@@ -83,16 +81,14 @@ void MoogAudioProcessorEditor::resized()
         paramLabels[i]->setBounds(labelBounds);
         paramSliders[i]->setBounds(paramBounds);
     }
-    */
 }
 
 void MoogAudioProcessorEditor::sliderValueChanged(Slider* slider)
 {
     if (AudioParameterFloat* param = (AudioParameterFloat*)getParameterForSlider(slider))
     {
-        
-        /*if (param->name == "fc")
-            processor.setG();*/
+        if (param->paramID == "fc")
+            processor.setG();
         *param = (float) slider->getValue();
     }
 }
