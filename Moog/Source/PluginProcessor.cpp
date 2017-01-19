@@ -250,11 +250,6 @@ void MoogAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
     *resonance = MemoryInputStream(data, static_cast<size_t>(sizeInBytes), false).readFloat();
 }
 
-bool MoogAudioProcessor::isFc(Slider* param)
-{
-    return false;
-}
-
 void MoogAudioProcessor::setG()
 {
     g = 1.0f-(float)exp(-M_PI_2*(*fc)/getSampleRate());

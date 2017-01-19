@@ -57,7 +57,6 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
     
     //==============================================================================
-    bool isFc(Slider* slider);
     void setG();
 
 private:
