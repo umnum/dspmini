@@ -8,21 +8,19 @@
   ==============================================================================
 */
 
-#ifndef PLUGINPROCESSOR_H_INCLUDED
-#define PLUGINPROCESSOR_H_INCLUDED
+#pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
-
+#include <JuceHeader.h>
 
 //==============================================================================
 /**
 */
-class MoogAudioProcessor  : public AudioProcessor
+class MoogLadderFilterAudioProcessor  : public AudioProcessor
 {
 public:
     //==============================================================================
-    MoogAudioProcessor();
-    ~MoogAudioProcessor();
+    MoogLadderFilterAudioProcessor();
+    ~MoogLadderFilterAudioProcessor();
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -32,7 +30,7 @@ public:
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
    #endif
 
-    void processBlock (AudioSampleBuffer&, MidiBuffer&) override;
+    void processBlock (AudioBuffer<float>&, MidiBuffer&) override;
 
     //==============================================================================
     AudioProcessorEditor* createEditor() override;
@@ -43,6 +41,7 @@ public:
 
     bool acceptsMidi() const override;
     bool producesMidi() const override;
+    bool isMidiEffect() const override;
     double getTailLengthSeconds() const override;
 
     //==============================================================================
@@ -56,22 +55,20 @@ public:
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     
-    //==============================================================================
-    void setG();
+    float setG();
 
-private:
     AudioParameterFloat* gain;
-    AudioParameterFloat* fc;
-    AudioParameterFloat* resonance;
-    float g;
-    float y[2][6];
-    float yprev[2][6];
-    float W[2][3];
-    float Wprev[2][3];
+    float noteOnVel;
     
+private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MoogAudioProcessor)
+       AudioParameterFloat* fc;
+       AudioParameterFloat* resonance;
+       float g;
+       float y[2][6];
+       float yprev[2][6];
+       float W[2][3];
+       float Wprev[2][3];
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MoogLadderFilterAudioProcessor)
 };
-
-
-#endif  // PLUGINPROCESSOR_H_INCLUDED

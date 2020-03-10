@@ -11,13 +11,12 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-
 //==============================================================================
-MoogAudioProcessorEditor::MoogAudioProcessorEditor (MoogAudioProcessor& p)
-    : AudioProcessorEditor (&p), processor (p),
-      noParameterLabel("noparam","No parameters available")
+MoogLadderFilterAudioProcessorEditor::MoogLadderFilterAudioProcessorEditor (MoogLadderFilterAudioProcessor& p)
+    : AudioProcessorEditor (&p), processor (p), noParameterLabel("noparam", "No parameters available")
 {
-    const OwnedArray<AudioProcessorParameter>& params = p.getParameters();
+    
+    const Array<AudioProcessorParameter *>& params = p.getParameters();
     for (int i = 0; i < params.size(); ++i)
     {
         if (const AudioParameterFloat* param = dynamic_cast<AudioParameterFloat*>(params[i]))
@@ -48,25 +47,23 @@ MoogAudioProcessorEditor::MoogAudioProcessorEditor (MoogAudioProcessor& p)
     {
         addAndMakeVisible(noParameterLabel);
     }
-    else
-    {
-        startTimer(100);
-    }
-
 }
 
-MoogAudioProcessorEditor::~MoogAudioProcessorEditor()
+MoogLadderFilterAudioProcessorEditor::~MoogLadderFilterAudioProcessorEditor()
 {
 }
 
 //==============================================================================
-void MoogAudioProcessorEditor::paint (Graphics& g)
+void MoogLadderFilterAudioProcessorEditor::paint (Graphics& g)
 {
-    g.setColour (Colours::white);
+    // (Our component is opaque, so we must completely fill the background with a solid colour)
+    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+
+    g.setColour (Colours::grey);
     g.fillRect(getLocalBounds());
 }
 
-void MoogAudioProcessorEditor::resized()
+void MoogLadderFilterAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
@@ -83,7 +80,7 @@ void MoogAudioProcessorEditor::resized()
     }
 }
 
-void MoogAudioProcessorEditor::sliderValueChanged(Slider* slider)
+void MoogLadderFilterAudioProcessorEditor::sliderValueChanged(Slider* slider)
 {
     if (AudioParameterFloat* param = (AudioParameterFloat*)getParameterForSlider(slider))
     {
@@ -93,13 +90,13 @@ void MoogAudioProcessorEditor::sliderValueChanged(Slider* slider)
     }
 }
 
-void MoogAudioProcessorEditor::sliderDragStarted(Slider* slider)
+void MoogLadderFilterAudioProcessorEditor::sliderDragStarted(Slider* slider)
 {
     if (AudioParameterFloat* param = (AudioParameterFloat*)getParameterForSlider(slider))
         param->beginChangeGesture();
 }
 
-void MoogAudioProcessorEditor::sliderDragEnded(Slider* slider)
+void MoogLadderFilterAudioProcessorEditor::sliderDragEnded(Slider* slider)
 {
     if (AudioParameterFloat* param = (AudioParameterFloat*)getParameterForSlider(slider))
     {
@@ -107,24 +104,8 @@ void MoogAudioProcessorEditor::sliderDragEnded(Slider* slider)
     }
 }
 
-void MoogAudioProcessorEditor::timerCallback()
+AudioParameterFloat* MoogLadderFilterAudioProcessorEditor::getParameterForSlider(Slider* slider)
 {
-    const OwnedArray<AudioProcessorParameter>& params = getAudioProcessor()->getParameters();
-    
-    for (int i = 0; i < params.size(); ++i)
-    {
-        if (const AudioParameterFloat* param = dynamic_cast<AudioParameterFloat*>(params[i]))
-        {
-            if (i < paramSliders.size())
-            {
-                paramSliders[i]->setValue(*param);
-            }
-        }
-    }
-}
-
-AudioParameterFloat* MoogAudioProcessorEditor::getParameterForSlider(Slider* slider)
-{
-    const OwnedArray<AudioProcessorParameter>& params = getAudioProcessor()->getParameters();
+    const Array<AudioProcessorParameter *>& params = getAudioProcessor()->getParameters();
     return dynamic_cast<AudioParameterFloat*>(params[paramSliders.indexOf(slider)]);
-}
+}   
