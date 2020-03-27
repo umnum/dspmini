@@ -1,7 +1,7 @@
 # Moog Ladder Filter
 
 <a href="https://drive.google.com/file/d/16F_a_m2T32haqDgcwwjGefTxDjV848CL/view?usp=sharing">
-<img src="https://imgur.com/a/9FDKQxK" width="500" href="https://imgur.com/a/9FDKQxK">
+  <img src="https://i.imgur.com/ih82iuv.png" width="500" href="https://drive.google.com/file/d/16F_a_m2T32haqDgcwwjGefTxDjV848CL/view?usp=sharing">
 </a>
 
 ### Synopsis
