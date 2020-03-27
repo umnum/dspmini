@@ -12,40 +12,33 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "KnobsComponent.h"
+#include "ScreenComponent.h"
 
 //==============================================================================
 /**
 */
-class MoogLadderFilterAudioProcessorEditor  : public AudioProcessorEditor,
-                                              public Slider::Listener{
+class MoogLadderFilterAudioProcessorEditor  : public AudioProcessorEditor
+{
 public:
-    enum
-    {
-        kParamControlHeight = 40,
-        kParamLabelWidth = 80,
-        kParamSliderWidth = 300
-    };
     MoogLadderFilterAudioProcessorEditor (MoogLadderFilterAudioProcessor&);
     ~MoogLadderFilterAudioProcessorEditor();
 
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
+    virtual void paintOverChildren (Graphics&) override;
+
    
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     MoogLadderFilterAudioProcessor& processor;
     
-    void sliderValueChanged (Slider*) override;
-    void sliderDragStarted (Slider*) override;
-    void sliderDragEnded (Slider*) override;
-
-    AudioParameterFloat* getParameterForSlider(Slider*);
-    
-    Label noParameterLabel;
-    OwnedArray<Slider> paramSliders;
-    OwnedArray<Label> paramLabels;
-
+    KnobsComponent knobsComponent;
+    ScreenComponent screenComponent;
+    Image backgroundImage;
+    Image screenImage;
+  
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MoogLadderFilterAudioProcessorEditor)
 };

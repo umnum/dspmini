@@ -55,20 +55,51 @@ public:
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     
+    // set the g coefficient of the ladder filter
     float setG();
+    // stores the next audio sample in a fifo buffer
+    void pushNextSampleIntoFifo (float sample) noexcept;
+    
+    enum
+    {
+        fftOrder = 11,
+        fftSize = 1 << fftOrder,
+        scopeSize = 512 // number of data points for displaying the spectrum graphics
+    };
 
     AudioParameterFloat* gain;
-    float noteOnVel;
+    AudioParameterFloat* fc;
+    AudioParameterFloat* resonance;
+    
+    struct AudioParamsInit
+    {
+        String ID;
+        String name;
+        float min;
+        float max;
+        float defaultValue;
+           
+    } gainParameter, fcParameter, resonanceParameter;
+    
+    // stores the results of an fft calculation
+    float fftData[2 * fftSize];
+    // fifo buffer stores audio for fft processing
+    float fifo[fftSize];
+    // counts the amount of samples in the fifo
+    int fifoIndex = 0;
+    // a flag for showing whether the next fft block is ready to render
+    bool nextFFTBlockReady = false;
+    // contains the data points to be displayed
+    float scopeData[scopeSize];
     
 private:
     //==============================================================================
-       AudioParameterFloat* fc;
-       AudioParameterFloat* resonance;
-       float g;
-       float y[2][6];
-       float yprev[2][6];
-       float W[2][3];
-       float Wprev[2][3];
-
+       
+    float g;
+    float y[2][6];
+    float yprev[2][6];
+    float W[2][3];
+    float Wprev[2][3];
+  
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MoogLadderFilterAudioProcessor)
 };

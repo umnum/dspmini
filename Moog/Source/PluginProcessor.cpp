@@ -10,7 +10,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#define Vt 0.025f
+#define Vt 0.025f // thermal voltage
 #define Vtx2 Vt*2.0f
 
 //==============================================================================
@@ -26,28 +26,46 @@ MoogLadderFilterAudioProcessor::MoogLadderFilterAudioProcessor()
                        )
 #endif
 {
-    addParameter (gain = new AudioParameterFloat ("gain", // parameterID,
-                                                     "Gain", // parameter name
-                                                     0.0f,   // minimum value
-                                                     1.0f,   // maximum value
-                                                     1.0f));    // default value
-       addParameter (fc = new AudioParameterFloat("fc", "Cutoff Frequency", 0.0f, 10000.0f, 10000.0f));
-       addParameter (resonance = new AudioParameterFloat("resonance", "Resonance", 0.0f, 10.0f, 1.0f));
+    gainParameter.ID = "gain";
+    gainParameter.name = "Gain";
+    gainParameter.min = 0.0f;
+    gainParameter.max = 1.0f;
+    gainParameter.defaultValue = 0.5f;
+    addParameter (gain = new AudioParameterFloat (gainParameter.ID, gainParameter.name, gainParameter.min, gainParameter.max, gainParameter.defaultValue));
+    
+    fcParameter.ID = "fc";
+    fcParameter.name = "Cutoff Frequency";
+    fcParameter.min = 20.0f;
+    fcParameter.max = 20000.0f;
+    fcParameter.defaultValue = 20000.0f;
+    addParameter (fc = new AudioParameterFloat(fcParameter.ID, fcParameter.name, fcParameter.min, fcParameter.max, fcParameter.defaultValue));
+    
+    resonanceParameter.ID = "resonance";
+    resonanceParameter.name = "Resonance";
+    resonanceParameter.min = 0.0f;
+    resonanceParameter.max = 10.0f;
+    resonanceParameter.defaultValue = 0.0f;
+    addParameter (resonance = new AudioParameterFloat(resonanceParameter.ID, resonanceParameter.name, resonanceParameter.min, resonanceParameter.max, resonanceParameter.defaultValue));
 
-       setG();
-       for (int i = 0; i < 6; ++i)
-       {
-           for (int channel = 0; channel < 2; ++channel)
-           {
-               y[channel][i] = 0.0f;
-               yprev[channel][i] = 0.0f;
-               if (i < 3)
-               {
-                   W[channel][i] = 0.0f;
-                   Wprev[channel][i] = 0.0f;
-               }
-           }
-       }
+    // initialize values for the ladder filter
+    setG();
+    for (int i = 0; i < 6; ++i)
+    {
+        for (int channel = 0; channel < 2; ++channel)
+        {
+            y[channel][i] = 0.0f;
+            yprev[channel][i] = 0.0f;
+            if (i < 3)
+            {
+                W[channel][i] = 0.0f;
+                Wprev[channel][i] = 0.0f;
+                
+            }
+            
+        }
+    }
+    // initialize scopeData with zeros to avoid reading erroneous data, if no audio input is initially flowing in
+    zeromem (scopeData, sizeof (scopeData));
 }
 
 MoogLadderFilterAudioProcessor::~MoogLadderFilterAudioProcessor()
@@ -170,14 +188,12 @@ void MoogLadderFilterAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
      for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
          buffer.clear (i, 0, numSamples);
 
-     // This is the place where you'd normally do the guts of your plugin's
-     // audio processing...
+     // get write access to the audio buffer for sample by sample processing
     float** channelData = buffer.getArrayOfWritePointers();
      for (int i = 0; i < numSamples; ++i)
      {
          for (int channel = 0; channel < totalNumInputChannels; ++channel)
          {
-             
              // process the Moog ladder filter
              float Vtx2xg = Vt*2*g;
              for (int m = 0; m < 2; ++m)
@@ -214,9 +230,14 @@ void MoogLadderFilterAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
                  yprev[channel][4] = y[channel][4];
              }
              channelData[channel][i] = y[channel][4];
+             if (channel == 0)
+             {
+                 // audio data from channel 0 will be processed in the spectrum analyzer
+                 pushNextSampleIntoFifo(*gain*300.0f*channelData[channel][i]);
+             }
          }
      }
-    buffer.applyGain(*gain*50.0f);
+    buffer.applyGain(*gain*300.0f);
 }
 
 //==============================================================================
@@ -254,4 +275,21 @@ float MoogLadderFilterAudioProcessor::setG()
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new MoogLadderFilterAudioProcessor();
+}
+
+void MoogLadderFilterAudioProcessor::pushNextSampleIntoFifo(float sample) noexcept
+{
+    if (fifoIndex == fftSize)
+    {
+        if (! nextFFTBlockReady)
+        {
+            zeromem (fftData, sizeof (fftData));
+            memcpy (fftData, fifo, sizeof (fifo));
+            nextFFTBlockReady = true;
+        }
+        
+        fifoIndex = 0;
+    }
+    
+    fifo[fifoIndex++] = sample;
 }

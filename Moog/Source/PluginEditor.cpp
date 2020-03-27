@@ -13,40 +13,17 @@
 
 //==============================================================================
 MoogLadderFilterAudioProcessorEditor::MoogLadderFilterAudioProcessorEditor (MoogLadderFilterAudioProcessor& p)
-    : AudioProcessorEditor (&p), processor (p), noParameterLabel("noparam", "No parameters available")
+    : AudioProcessorEditor (&p), processor (p),
+      // load background images
+      backgroundImage(ImageFileFormat::loadFrom(BinaryData::moog_ladder_filter_background_png, (size_t)BinaryData::moog_ladder_filter_background_pngSize)), screenImage(ImageFileFormat::loadFrom(BinaryData::moog_ladder_filter_screen_png, (size_t)BinaryData::moog_ladder_filter_screen_pngSize)), knobsComponent(p), screenComponent(p)
 {
-    
-    const Array<AudioProcessorParameter *>& params = p.getParameters();
-    for (int i = 0; i < params.size(); ++i)
-    {
-        if (const AudioParameterFloat* param = dynamic_cast<AudioParameterFloat*>(params[i]))
-        {
-            Slider* aSlider;
-           
-            paramSliders.add(aSlider = new Slider (param->name));
-            aSlider->setRange(param->range.start, param->range.end);
-            aSlider->setSliderStyle(Slider::LinearHorizontal);
-            aSlider->setValue(*param);
-            aSlider->addListener(this);
-            addAndMakeVisible(aSlider);
-            
-            Label* aLabel;
-            paramLabels.add(aLabel = new Label (param->name, param->name));
-            addAndMakeVisible(aLabel);
-        }
-    }
-    
-    noParameterLabel.setJustificationType(Justification::horizontallyCentred | Justification::verticallyCentred);
-    noParameterLabel.setFont(noParameterLabel.getFont().withStyle(Font::italic));
+    // add the knobs and screen graphics to the main plugin editor
+    addAndMakeVisible(knobsComponent);
+    addAndMakeVisible(screenComponent);
     
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize(kParamSliderWidth + kParamLabelWidth, jmax(1, kParamControlHeight*paramSliders.size()));
-    
-    if (paramSliders.size() == 0)
-    {
-        addAndMakeVisible(noParameterLabel);
-    }
+    setSize(700,300);
 }
 
 MoogLadderFilterAudioProcessorEditor::~MoogLadderFilterAudioProcessorEditor()
@@ -57,55 +34,34 @@ MoogLadderFilterAudioProcessorEditor::~MoogLadderFilterAudioProcessorEditor()
 void MoogLadderFilterAudioProcessorEditor::paint (Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    g.fillAll (Colours::transparentBlack);
 
-    g.setColour (Colours::grey);
-    g.fillRect(getLocalBounds());
+    // draw the screen image
+    auto screenArea = getLocalBounds().toFloat();
+    screenArea.removeFromTop(getHeight()*0.16f);
+    screenArea.removeFromBottom(getHeight()*0.1f);
+    g.drawImage(screenImage, screenArea);
+    
 }
 
 void MoogLadderFilterAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
+    // lay out the positions of the knobs component and screen component
     Rectangle<int> r = getLocalBounds();
-    noParameterLabel.setBounds(r);
-    
-    for (int i = 0; i < paramSliders.size(); ++i)
-    {
+    r.removeFromLeft(r.getWidth()/10);
+    auto screenArea = r.removeFromRight(r.getWidth()/2);
+    r.removeFromTop(r.getHeight()*0.122f);
+    r.removeFromBottom(r.getHeight()*0.143f);
+    knobsComponent.setBounds(r);
+    screenArea.removeFromTop(getHeight()*0.41f);
+    screenArea.removeFromBottom(getHeight()*0.259f);
+    screenArea.removeFromLeft(getWidth()*0.063f);   
+    screenArea.removeFromRight(getWidth()*0.095f);
+    screenComponent.setBounds(screenArea);
+} 
 
-        Rectangle<int> paramBounds = r.removeFromTop(kParamControlHeight);
-        Rectangle<int> labelBounds = paramBounds.removeFromLeft(kParamLabelWidth);
-        paramLabels[i]->setBounds(labelBounds);
-        paramSliders[i]->setBounds(paramBounds);
-    }
-}
-
-void MoogLadderFilterAudioProcessorEditor::sliderValueChanged(Slider* slider)
+void MoogLadderFilterAudioProcessorEditor::paintOverChildren(Graphics &g)
 {
-    if (AudioParameterFloat* param = (AudioParameterFloat*)getParameterForSlider(slider))
-    {
-        if (param->paramID == "fc")
-            processor.setG();
-        *param = (float) slider->getValue();
-    }
+    // the screen image must be behind the background image and screen graphics
+    g.drawImage(backgroundImage, getLocalBounds().toFloat());
 }
-
-void MoogLadderFilterAudioProcessorEditor::sliderDragStarted(Slider* slider)
-{
-    if (AudioParameterFloat* param = (AudioParameterFloat*)getParameterForSlider(slider))
-        param->beginChangeGesture();
-}
-
-void MoogLadderFilterAudioProcessorEditor::sliderDragEnded(Slider* slider)
-{
-    if (AudioParameterFloat* param = (AudioParameterFloat*)getParameterForSlider(slider))
-    {
-        param->endChangeGesture();
-    }
-}
-
-AudioParameterFloat* MoogLadderFilterAudioProcessorEditor::getParameterForSlider(Slider* slider)
-{
-    const Array<AudioProcessorParameter *>& params = getAudioProcessor()->getParameters();
-    return dynamic_cast<AudioParameterFloat*>(params[paramSliders.indexOf(slider)]);
-}   

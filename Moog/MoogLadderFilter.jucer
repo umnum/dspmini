@@ -3,7 +3,29 @@
 <JUCERPROJECT id="bxoXQe" name="MoogLadderFilter" projectType="audioplug" jucerVersion="5.4.7"
               pluginFormats="buildAU,buildStandalone,buildVST3">
   <MAINGROUP id="D7blqG" name="MoogLadderFilter">
+    <GROUP id="{0F536F05-ECFF-8569-41C1-C28BDD76A583}" name="Resources">
+      <GROUP id="{274D4448-7EA1-08CB-71F4-611BD39AD86A}" name="Images">
+        <FILE id="DrBYt2" name="moog_ladder_filter_background.png" compile="0"
+              resource="1" file="../../MoogLadderFilter/Resources/Images/moog_ladder_filter_background.png"/>
+        <FILE id="Utx7Hh" name="moog_ladder_filter_knob_strip.png" compile="0"
+              resource="1" file="../../MoogLadderFilter/Resources/Images/moog_ladder_filter_knob_strip.png"/>
+        <FILE id="s9aVJD" name="moog_ladder_filter_screen.png" compile="0"
+              resource="1" file="../../MoogLadderFilter/Resources/Images/moog_ladder_filter_screen.png"/>
+      </GROUP>
+    </GROUP>
     <GROUP id="{58F61F99-2AD2-405E-CCA3-1111701809C9}" name="Source">
+      <FILE id="UmuQmJ" name="ScreenComponent.cpp" compile="1" resource="0"
+            file="Source/ScreenComponent.cpp"/>
+      <FILE id="wh92CW" name="ScreenComponent.h" compile="0" resource="0"
+            file="Source/ScreenComponent.h"/>
+      <FILE id="StYLsM" name="KnobLookAndFeel.cpp" compile="1" resource="0"
+            file="Source/KnobLookAndFeel.cpp"/>
+      <FILE id="yM3HPu" name="KnobLookAndFeel.h" compile="0" resource="0"
+            file="Source/KnobLookAndFeel.h"/>
+      <FILE id="v4NNCY" name="KnobsComponent.cpp" compile="1" resource="0"
+            file="Source/KnobsComponent.cpp"/>
+      <FILE id="uRhxv4" name="KnobsComponent.h" compile="0" resource="0"
+            file="Source/KnobsComponent.h"/>
       <FILE id="IFNJmm" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="b0jjPZ" name="PluginProcessor.h" compile="0" resource="0"
@@ -34,6 +56,7 @@
         <MODULEPATH id="juce_gui_basics" path="../../JUCE/modules"/>
         <MODULEPATH id="juce_gui_extra" path="../../JUCE/modules"/>
         <MODULEPATH id="juce_opengl" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../../JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
   </EXPORTFORMATS>
@@ -48,6 +71,7 @@
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
