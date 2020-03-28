@@ -6,11 +6,14 @@
 
 ### Synopsis
 This is a Matlab and JUCE implementation of a Moog Ladder Filter based on A. Huovilainen's 2004 paper [Non-Linear Digital Implementation of the Moog Ladder Filter](https://pdfs.semanticscholar.org/c490/4c04a7be1d675e360409178da71a1253f6d8.pdf).
-This plugin includes GUI interface for easy interaction with the filter's parameters and for visualization of the audio spectrum contents.
+This plugin includes a GUI interface for easy interaction with the filter's parameters and for visualization of the audio spectrum contents.
 
 ### Motivation
 This implementation was part of a Signal Processing mini project at Aalborg University as a part of my Master's program in Sound and Music Computing.
-I have recently revised this implementation mainly to fix an audio issue, write cleaner and more presentable code, and update the program for the current version of JUCE.
+I have recently revised this implementation mainly to fix an audio issue, write cleaner and more presentable code, update the program for the current version of JUCE, and provide a better GUI interface.
+
+### Install
+The Moog Ladder Filter is available for macOS as an AU and VST3 plugin. Download the package installer <a href="https://github.com/umnum/dspmini/blob/master/Moog/Install/MacOSX/Moog%20Ladder%20Filter.dmg?raw=true" download>here</a>.
 
 ## Built With
 
