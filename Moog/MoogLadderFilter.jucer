@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="bxoXQe" name="MoogLadderFilter" projectType="audioplug" jucerVersion="5.4.7"
-              pluginFormats="buildAU,buildStandalone,buildVST3" bundleIdentifier="com.michaelcastanieto.MoogLadderFilter">
+              pluginFormats="buildAU,buildStandalone,buildVST3" bundleIdentifier="com.michaelcastanieto.MoogLadderFilter"
+              pluginManufacturer="michaelcastanieto" aaxIdentifier="com.michaelcastanieto.MoogLadderFilter">
   <MAINGROUP id="D7blqG" name="MoogLadderFilter">
     <GROUP id="{0F536F05-ECFF-8569-41C1-C28BDD76A583}" name="Resources">
       <GROUP id="{274D4448-7EA1-08CB-71F4-611BD39AD86A}" name="Images">
