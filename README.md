@@ -13,7 +13,7 @@ This implementation was part of a Signal Processing mini project at Aalborg Univ
 I have recently revised this implementation mainly to fix an audio issue, write cleaner and more presentable code, update the program for the current version of JUCE, and provide a better GUI interface.
 
 ### Install
-The Moog Ladder Filter is available for macOS as an AU and VST3 plugin. Download the package installer <a href="https://github.com/umnum/dspmini/raw/master/Moog/Install/Moog%20Ladder%20Filter.pkg" download>here</a>.
+The Moog Ladder Filter is available for macOS as an AU and VST3 plugin. Download the package installer <a href="https://github.com/umnum/dspmini/raw/master/Moog/Install/MacOSX/Moog%20Ladder%20Filter.dmg" download>here</a>.
 
 ## Built With
 
